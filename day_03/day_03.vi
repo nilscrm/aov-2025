@@ -1,12 +1,52 @@
 
-// use #util::{...};
-
 pub fn main(&io: &IO) {
-  let input = io.full_input();
-
   let part1 = 0;
-  io.println("Part 1: {part1}");
+  let part2 = 0[N64];
 
-  let part2 = 0;
+  while io.read_line() is Some(line) {
+    let line2 = line;
+    let first = line!.pop_front().assume() - '0';
+    let second = 0;
+    let joltage = 0;
+    for _ in 1..line.len() {
+      let d = line!.pop_front().assume() - '0';
+      when {
+        d > first {
+          first = d;
+          second = 0;
+        }
+        d > second {
+          second = d;
+          joltage = N32::max(joltage, first * 10 + second);
+        }
+      }
+    }
+    let last = line!.pop_front().assume() - '0';
+    if last > second {
+      joltage = first * 10 + last;
+    }
+    part1 += joltage;
+
+    let digits = line2!.map(fn* (c: Char) { c - '0' });
+    let (pref, suf) = digits.split_at(digits.len() - 12);
+    let joltage = 0[N64];
+    for _ in 0..12 {
+      pref.push_back(suf.pop_front().assume());
+      let max = 0;
+      let max_idx = 0;
+      for (i, &d) in pref.iter_ref().enumerate() {
+        if d > max {
+          max = d;
+          max_idx = i;
+        }
+      }
+      let (_, pref_) = pref.split_at(max_idx + 1);
+      pref = pref_;
+      joltage *= 10;
+      joltage += max;
+    }
+    part2 += joltage;
+  }
+  io.println("Part 1: {part1}");
   io.println("Part 2: {part2}");
 }
