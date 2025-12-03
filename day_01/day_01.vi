@@ -1,12 +1,44 @@
 
-// use #util::{...};
-
 pub fn main(&io: &IO) {
-  let input = io.full_input();
-
+  let position = +50;
   let part1 = 0;
-  io.println("Part 1: {part1}");
+  let part2 = +0;
 
-  let part2 = 0;
-  io.println("Part 2: {part2}");
+  while io.read_line() is Some(line) {
+    let direction = line!.pop_front().assume();
+    let distance = N32::parse(line).assume();
+
+    if direction == 'L' {
+      let old_pos = position;
+      position -= distance as I32;
+
+      when {
+        position > +0 {}
+        position < +0 {
+          if old_pos > +0 {
+            part2 += +1;
+          }
+          part2 += (position / +100).abs();
+          position %= +100;
+          if position < +0 {
+            position += +100;
+          }
+        }
+        _ {
+          part2 += +1;
+        }
+      }
+    } else {
+      position += distance as I32;
+      part2 += position / +100;
+      position %= +100;
+    }
+
+    if position == +0 {
+      part1 += 1;
+    }
+  }
+
+  io.println("Part 1: {part1}");
+  io.println("Part 2: {part2 as N32}");
 }
