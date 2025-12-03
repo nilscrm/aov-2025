@@ -1,12 +1,57 @@
 
-// use #util::{...};
+fn is_invalid(x: String) -> Bool {
+  if x.len() % 2 == 0 {
+    let (s1, s2) = x.split_at(x.len() / 2);
+    s1 == s2
+  } else {
+    false
+  }
+}
+
+fn is_invalid2(x: String) -> Bool {
+  let len = x.len();
+  for i in 3..(len + 1) {
+    if len % i == 0 {
+      let part_len = len / i;
+      let (pref, rest) = x.split_at(part_len);
+      while rest.len() != 0 {
+        let (p, rest_) = rest.split_at(part_len);
+        if p != pref {
+          continue.for;
+        }
+        rest = rest_;
+      }
+      return true;
+    }
+  }
+  false
+}
 
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let line = io.read_line().assume();
 
-  let part1 = 0;
+  let part1 = 0[N64];
+  let part2 = 0[N64];
+
+  for range in line.split(",").iter() {
+    let parts = range.split("-");
+    let start = N32::parse(parts.pop_front().assume()).assume();
+    let end = N32::parse(parts.pop_front().assume()).assume();
+
+    for n in start..(end + 1) {
+      let str = n as String;
+      when {
+        is_invalid(str) {
+          part1 += n;
+        }
+        is_invalid2(str) {
+          part2 += n;
+        }
+        _ {}
+      }
+    }
+  }
+
   io.println("Part 1: {part1}");
-
-  let part2 = 0;
-  io.println("Part 2: {part2}");
+  io.println("Part 2: {part1 + part2}");
 }
