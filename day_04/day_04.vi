@@ -1,107 +1,78 @@
 
-// use #util::{...};
+use #util::{Cell, Recv, Send, Stream};
 use #root::data::Array;
+use #root::data::Iterator::Fused;
 
 pub fn main(&io: &IO) {
-  let grid = Array::empty;
+  let grid = List::empty;
 
+  let first = io.read_byte('.');
+  let prev = Cell::new(first);
+  let first_row = [];
+  for c in io.read_line().assume().iter() {
+    let cell = Cell::new(c);
+    prev.connect(&cell);
+    first_row.push_back(prev);
+    prev = cell;
+  }
+  first_row.push_back(prev);
+
+  let prev_row = first_row;
   while io.read_line() is Some(line) {
-    grid.push_back(line!);
-  }
+    let row = [];
+    let prev_iter = Fused::new(prev_row.iter_ref());
+    let nw = None();
+    let n = prev_iter.next();
+    let ne = prev_iter.next();
+    let w = None();
 
-  let part1_cells = [];
-
-  for i in 0..grid.len() {
-    for j in 0..grid.at(0).assume().*.len() {
-      let &line = grid.at(i).assume();
-      if line.get(j).assume() != '@' {
-        continue;
+    for c in line.iter() {
+      let cell = Cell::new(c);
+      if nw is Some(nw) {
+        cell.connect(nw);
       }
-      let neigh = 0;
-      if line.get(j - 1) is Some(west) and west == '@' {
-        neigh += 1;
+      if n is Some(n) {
+        cell.connect(n);
       }
-      if line.get(j + 1) is Some(east) and east == '@' {
-        neigh += 1;
+      if ne is Some(ne) {
+        cell.connect(ne);
       }
-      if grid.at(i - 1) is Some(&north) {
-        if north.get(j - 1) is Some(north_west) and north_west == '@' {
-          neigh += 1;
-        }
-        if north.get(j) is Some(north_east) and north_east == '@' {
-          neigh += 1;
-        }
-        if north.get(j + 1) is Some(north_east) and north_east == '@' {
-          neigh += 1;
-        }
-      }
-      if grid.at(i + 1) is Some(&south) {
-        if south.get(j - 1) is Some(south_west) and south_west == '@' {
-          neigh += 1;
-        }
-        if south.get(j) is Some(south_east) and south_east == '@' {
-          neigh += 1;
-        }
-        if south.get(j + 1) is Some(south_east) and south_east == '@' {
-          neigh += 1;
-        }
-      }
-      if neigh < 4 {
-        part1_cells.push_back((i, j));
-      }
+      if w is Some(w) {
+        cell.connect(&w);
+        row.push_back(w);
+      } else {}
+      (nw, n, ne) = (n, ne, prev_iter.next());
+      w = Some(cell);
     }
+    row.push_back(w.assume());
+    grid.push_back(prev_row);
+    prev_row = row;
   }
+  grid.push_back(prev_row);
 
-  let part1 = part1_cells.len();
-
-  for (i, j) in part1_cells.iter() {
-    *grid.at(i).assume().*.at(j).assume() = 'x';
-  }
-
-  let part2 = part1;
-
+  let part1 = 0;
+  let part2 = 0;
   loop {
     let prev = part2;
-    for i in 0..grid.len() {
-      for j in 0..grid.at(0).assume().*.len() {
-        let &line = grid.at(i).assume();
-        if line.get(j).assume() != '@' {
-          continue;
+    for &row in grid.iter_ref() {
+      for &Cell({ data, in_edges, out_edges }) in row.iter_ref() {
+        for &o in out_edges.iter_ref() {
+          o.send_stream(data);
         }
-        let neigh = 0;
-        if line.get(j - 1) is Some(west) and west == '@' {
-          neigh += 1;
-        }
-        if line.get(j + 1) is Some(east) and east == '@' {
-          neigh += 1;
-        }
-        if grid.at(i - 1) is Some(&north) {
-          if north.get(j - 1) is Some(north_west) and north_west == '@' {
-            neigh += 1;
-          }
-          if north.get(j) is Some(north_east) and north_east == '@' {
-            neigh += 1;
-          }
-          if north.get(j + 1) is Some(north_east) and north_east == '@' {
-            neigh += 1;
+        let neighbors = 0;
+        for &i in in_edges.iter_ref() {
+          if i.recv_stream() == '@' {
+            neighbors += 1;
           }
         }
-        if grid.at(i + 1) is Some(&south) {
-          if south.get(j - 1) is Some(south_west) and south_west == '@' {
-            neigh += 1;
-          }
-          if south.get(j) is Some(south_east) and south_east == '@' {
-            neigh += 1;
-          }
-          if south.get(j + 1) is Some(south_east) and south_east == '@' {
-            neigh += 1;
-          }
-        }
-        if neigh < 4 {
+        if data == '@' and neighbors < 4 {
           part2 += 1;
-          *line.at(j).assume() = 'x';
+          data = 'x';
         }
       }
+    }
+    if part1 == 0 {
+      part1 = part2;
     }
     if prev != part2 {
       continue;
@@ -110,4 +81,6 @@ pub fn main(&io: &IO) {
 
   io.println("Part 1: {part1}");
   io.println("Part 2: {part2}");
+
+  unsafe::erase(grid);
 }
