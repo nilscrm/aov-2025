@@ -1,4 +1,56 @@
 
-pub fn something_helpful(a: N32, b: N32) -> N32 {
-  a + b
+pub struct Stream[T]((T, Stream[T]));
+
+pub struct Send[T](~T);
+pub mod Send {
+  pub fn .send[T](Send[T](~send), data: T) {
+    send = data;
+  }
+
+  pub fn .send_stream[T](&Send[Stream[T]](~send), data: T) {
+    send = Stream(data, send);
+  }
+
+  pub fn .close_stream[T](Send[Stream[T]](send)) {
+    unsafe::erase(send);
+  }
+}
+
+pub struct Recv[T](T);
+pub mod Recv {
+  pub fn .recv[T](Recv[T](recv)) -> T {
+    recv
+  }
+
+  pub fn .recv_stream[T](&Recv[Stream[T]](recv)) -> T {
+    let data;
+    Stream(data, recv) = recv;
+    data
+  }
+
+  pub fn .close_stream[T](Recv[Stream[T]](recv)) {
+    unsafe::erase(recv);
+  }
+}
+
+pub struct Cell[T, M](pub { data: T, in_edges: List[Recv[M]], out_edges: List[Send[M]] });
+
+pub mod Cell[T, M] {
+  pub fn new[...](data: T) -> Cell[T, M] {
+    Cell[T, M]({ data, in_edges: [], out_edges: [] })
+  }
+
+  pub fn .create_edge_to[...](
+    &Cell[T, M]({ data: _, in_edges: _, out_edges }),
+    &Cell[T, M]({ data: _, in_edges, out_edges: _ }),
+  ) {
+    let stream;
+    out_edges.push_back(Send(~stream));
+    in_edges.push_back(Recv(stream));
+  }
+
+  pub fn .connect[...](&self: &Cell[T, M], &other: &Cell[T, M]) {
+    self.create_edge_to(&other);
+    other.create_edge_to(&self);
+  }
 }
