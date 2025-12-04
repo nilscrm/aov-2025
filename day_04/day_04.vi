@@ -1,12 +1,113 @@
 
 // use #util::{...};
+use #root::data::Array;
 
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let grid = Array::empty;
 
-  let part1 = 0;
+  while io.read_line() is Some(line) {
+    grid.push_back(line!);
+  }
+
+  let part1_cells = [];
+
+  for i in 0..grid.len() {
+    for j in 0..grid.at(0).assume().*.len() {
+      let &line = grid.at(i).assume();
+      if line.get(j).assume() != '@' {
+        continue;
+      }
+      let neigh = 0;
+      if line.get(j - 1) is Some(west) and west == '@' {
+        neigh += 1;
+      }
+      if line.get(j + 1) is Some(east) and east == '@' {
+        neigh += 1;
+      }
+      if grid.at(i - 1) is Some(&north) {
+        if north.get(j - 1) is Some(north_west) and north_west == '@' {
+          neigh += 1;
+        }
+        if north.get(j) is Some(north_east) and north_east == '@' {
+          neigh += 1;
+        }
+        if north.get(j + 1) is Some(north_east) and north_east == '@' {
+          neigh += 1;
+        }
+      }
+      if grid.at(i + 1) is Some(&south) {
+        if south.get(j - 1) is Some(south_west) and south_west == '@' {
+          neigh += 1;
+        }
+        if south.get(j) is Some(south_east) and south_east == '@' {
+          neigh += 1;
+        }
+        if south.get(j + 1) is Some(south_east) and south_east == '@' {
+          neigh += 1;
+        }
+      }
+      if neigh < 4 {
+        part1_cells.push_back((i, j));
+      }
+    }
+  }
+
+  let part1 = part1_cells.len();
+
+  for (i, j) in part1_cells.iter() {
+    *grid.at(i).assume().*.at(j).assume() = 'x';
+  }
+
+  let part2 = part1;
+
+  loop {
+    let prev = part2;
+    for i in 0..grid.len() {
+      for j in 0..grid.at(0).assume().*.len() {
+        let &line = grid.at(i).assume();
+        if line.get(j).assume() != '@' {
+          continue;
+        }
+        let neigh = 0;
+        if line.get(j - 1) is Some(west) and west == '@' {
+          neigh += 1;
+        }
+        if line.get(j + 1) is Some(east) and east == '@' {
+          neigh += 1;
+        }
+        if grid.at(i - 1) is Some(&north) {
+          if north.get(j - 1) is Some(north_west) and north_west == '@' {
+            neigh += 1;
+          }
+          if north.get(j) is Some(north_east) and north_east == '@' {
+            neigh += 1;
+          }
+          if north.get(j + 1) is Some(north_east) and north_east == '@' {
+            neigh += 1;
+          }
+        }
+        if grid.at(i + 1) is Some(&south) {
+          if south.get(j - 1) is Some(south_west) and south_west == '@' {
+            neigh += 1;
+          }
+          if south.get(j) is Some(south_east) and south_east == '@' {
+            neigh += 1;
+          }
+          if south.get(j + 1) is Some(south_east) and south_east == '@' {
+            neigh += 1;
+          }
+        }
+        if neigh < 4 {
+          part2 += 1;
+          *line.at(j).assume() = 'x';
+        }
+      }
+    }
+    if prev != part2 {
+      continue;
+    }
+  }
+
   io.println("Part 1: {part1}");
-
-  let part2 = 0;
   io.println("Part 2: {part2}");
 }
