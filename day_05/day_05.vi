@@ -1,12 +1,68 @@
 
-// use #util::{...};
+use #root::ops::comparison::Ord;
+
+pub struct* Range(pub N64, N64);
+
+pub mod Range {
+  pub fn .contains(&Range(start, end), &val: &N64) -> Bool {
+    start <= val <= end
+  }
+
+  pub impl ord: Ord[Range] {
+    fn cmp(&Range(start1, _), &Range(start2, _)) -> Ord {
+      start1.cmp(&start2)
+    }
+    fn lt(&Range(start1, _), &Range(start2, _)) -> Bool {
+      start1 < start2
+    }
+    fn le(&Range(start1, _), &Range(start2, _)) -> Bool {
+      start1 <= start2
+    }
+  }
+
+  pub fn .len(&Range(start, end)) -> N64 {
+    end - start + 1
+  }
+}
 
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let ranges = [];
+
+  while io.read_line() is Some(line) and line.len() != 0 {
+    let (start, end) = line.split_once("-");
+    let start = N64::parse(start).assume();
+    let end = N64::parse(end.assume()).assume();
+    ranges.push_back(Range(start, end));
+  }
 
   let part1 = 0;
-  io.println("Part 1: {part1}");
+  while io.read_line() is Some(line) {
+    let id = N64::parse(line).assume();
+    if ranges.iter_ref().any(fn* (&range: &Range) { range.contains(&id) }) {
+      part1 += 1;
+    }
+  }
 
-  let part2 = 0;
+  ranges.sort();
+
+  let compressed_ranges = [];
+  let Range(curr_start, curr_end) = ranges.pop_front().assume();
+
+  for Range(new_start, new_end) in ranges.iter() {
+    if new_start <= curr_end {
+      curr_end = N64::max(curr_end, new_end);
+    } else {
+      compressed_ranges.push_back(Range(curr_start, curr_end));
+      (curr_start, curr_end) = (new_start, new_end);
+    }
+  }
+  compressed_ranges.push_back(Range(curr_start, curr_end));
+
+  let part2 = 0[N64];
+  for range in compressed_ranges.iter() {
+    part2 += range.len();
+  }
+
+  io.println("Part 1: {part1}");
   io.println("Part 2: {part2}");
 }
