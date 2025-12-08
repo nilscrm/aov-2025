@@ -1,12 +1,104 @@
 
-// use #util::{...};
+fn .split_whitespace(str: String) -> List[String] {
+  let parts = [];
+  loop {
+    str!.drop_while(fn* (&c: &Char) { c.is_whitespace() });
+    if str.len() > 0 {
+      let (head, tail) = str.split_once(" ");
+      parts.push_back(head);
+      if tail is Some(tail) {
+        str = tail;
+        continue;
+      }
+    }
+  }
+  parts
+}
 
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let problems = [];
 
-  let part1 = 0;
+  let first_line = io.read_line().assume();
+  let lines = [first_line!];
+
+  for x in first_line.split_whitespace() {
+    problems.push_back([N32::parse(x).assume()]);
+  }
+
+  let part1 = 0[N64];
+  let ops = [];
+
+  while io.read_line() is Some(line) {
+    let head = line!.get(0).assume();
+    if head == '+' or head == '*' {
+      ops = line!;
+      for (p, op) in problems.iter().zip(line.split_whitespace().iter()) {
+        if op == "+" {
+          let sum = 0[N64];
+          for x in p.iter() {
+            sum += x;
+          }
+          part1 += sum;
+        } else {
+          let product = 1[N64];
+          for x in p.iter() {
+            product *= x;
+          }
+          part1 += product;
+        }
+      }
+    } else {
+      lines.push_back(line!);
+      for (&p, x) in problems.iter_ref().zip(line.split_whitespace().iter()) {
+        p.push_back(N32::parse(x).assume());
+      }
+    }
+  }
+
   io.println("Part 1: {part1}");
 
-  let part2 = 0;
+  let part2 = 0[N64];
+
+  let op = ops.pop_front().assume();
+  let cur = if op == '+' {
+    0[N64]
+  } else {
+    1[N64]
+  };
+  loop {
+    let o = ops.pop_front();
+    if o is Some(o) impl o == ' ' {
+      let num = [];
+      for &line in &lines {
+        let digit = line.pop_front().assume();
+        if digit != ' ' {
+          num.push_back(digit);
+        }
+      }
+      let num = N32::parse(String(num).trim()).assume();
+      if op == '+' {
+        cur += num;
+      } else {
+        cur *= num;
+      }
+      if o is None() {
+        part2 += cur;
+        break;
+      }
+    } else {
+      part2 += cur;
+      op = o.assume();
+      cur = if op == '+' {
+        0[N64]
+      } else {
+        1[N64]
+      };
+      for &line in &lines {
+        line.pop_front();
+      }
+    }
+    continue;
+  }
+
   io.println("Part 2: {part2}");
 }
