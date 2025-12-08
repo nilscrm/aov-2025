@@ -1,12 +1,46 @@
 
-// use #util::{...};
-
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let line = io.read_line().assume();
+  io.read_line();
+
+  let beams = [];
+  for c in line {
+    if c == '.' {
+      beams.push_back(0[N64]);
+    } else {
+      beams.push_back(1[N64]);
+    }
+  }
 
   let part1 = 0;
+
+  while io.read_line() is Some(line) {
+    let (left, middle, right) = (0[N64], 0[N64], 0[N64]);
+    let new_beams = [];
+    for (c, beam) in line.iter().zip(beams.iter()) {
+      if !beam.is_zero() {
+        if c == '^' {
+          left += beam;
+          right += beam;
+          part1 += 1;
+        } else {
+          middle += beam;
+        }
+      }
+      new_beams.push_back(left);
+      (left, middle, right) = (middle, right, 0[N64]);
+    }
+    new_beams.push_back(left);
+    new_beams.pop_front();
+    beams = new_beams;
+    io.read_line();
+  }
+
   io.println("Part 1: {part1}");
 
-  let part2 = 0;
+  let part2 = 0[N64];
+  for beam in beams {
+    part2 += beam;
+  }
   io.println("Part 2: {part2}");
 }
