@@ -1,12 +1,93 @@
 
-// use #util::{...};
+use #util::Cell;
+use #root::data::Map;
+use #root::ops::elementwise as _;
+
+type Node = Cell[(), (N32, Nat, Nat, Nat, Nat)];
+
+impl drop_cell: Drop[Node] {
+  fn drop(Cell[(), (N32, Nat, Nat, Nat, Nat)]({ data: _, in_edges: _, out_edges })) {
+    unsafe::erase(out_edges);
+  }
+}
 
 pub fn main(&io: &IO) {
-  let input = io.full_input();
+  let cells = Map::empty[String, Node];
+  let connections = [];
+  while io.read_line() is Some(line) {
+    let (from, to) = line.split_once(": ");
+    let to = to.assume().split(" ");
+    connections.push_back((from, to));
+  }
+  for (from, tos) in connections {
+    for to in tos {
+      cells.at_or_insert(from, Cell::new(())).*.create_edge_to(cells.at_or_insert(to, Cell::new(())));
+    }
+  }
+
+  let Cell({ data: _, in_edges: you_in_edges, out_edges: you_out_edges }) = cells.remove(&"you").assume();
+  let Cell({ data: _, in_edges: _, out_edges: svr_out_edges }) = cells.remove(&"svr").assume();
+  let Cell({ data: _, in_edges: out_in_edges, out_edges }) = cells.remove(&"out").assume();
+  unsafe::erase(out_edges);
+  let Cell({ data: _, in_edges: fft_in_edges, out_edges: fft_out_edges }) = cells.remove(&"fft").assume();
+  let Cell({ data: _, in_edges: dac_in_edges, out_edges: dac_out_edges }) = cells.remove(&"dac").assume();
+
+  for out_edge in svr_out_edges {
+    out_edge.send((0, 1[Nat], 0[Nat], 0[Nat], 0[Nat]));
+  }
+
+  let (p2, p3, p4, p5) = (0[Nat], 0[Nat], 0[Nat], 0[Nat]);
+  for in_edge in you_in_edges {
+    let (_, i2, i3, i4, i5) = in_edge.recv();
+    p2 += i2;
+    p3 += i3;
+    p4 += i4;
+    p5 += i5;
+  }
+  for out_edge in you_out_edges {
+    out_edge.send((1, p2, p3, p4, p5));
+  }
+
+  for (_, Cell({ data: _, in_edges, out_edges })) in cells {
+    let paths = (0, 0[Nat], 0[Nat], 0[Nat], 0[Nat]);
+    for in_edge in in_edges {
+      paths += in_edge.recv();
+    }
+    for out_edge in out_edges {
+      out_edge.send(paths);
+    }
+  };
+
+  let (p1, p3, p5) = (0, 0[Nat], 0[Nat]);
+  for in_edge in fft_in_edges {
+    let (i1, i2, _, i4, _) = in_edge.recv();
+    p1 += i1;
+    p3 += i2;
+    p5 += i4;
+  }
+  for out_edge in fft_out_edges {
+    out_edge.send((p1, 0[Nat], p3, 0[Nat], p5));
+  }
+
+  let (p1, p4, p5) = (0, 0[Nat], 0[Nat]);
+  for in_edge in dac_in_edges {
+    let (i1, i2, i3, _, _) = in_edge.recv();
+    p1 += i1;
+    p4 += i2;
+    p5 += i3;
+  }
+  for out_edge in dac_out_edges {
+    out_edge.send((p1, 0[Nat], 0[Nat], p4, p5));
+  }
 
   let part1 = 0;
-  io.println("Part 1: {part1}");
+  let part2 = 0[Nat];
+  for in_edge in out_in_edges {
+    let (p1, _, _, _, p2) = in_edge.recv();
+    part1 += p1;
+    part2 += p2;
+  }
 
-  let part2 = 0;
+  io.println("Part 1: {part1}");
   io.println("Part 2: {part2}");
 }
